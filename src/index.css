@@ -15,22 +15,25 @@
     @apply bg-background;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-secondary/20 rounded-full;
+    @apply bg-[#174A8B]/30 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-secondary/40;
+    @apply bg-[#174A8B]/50;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl;
+  .btn-primary {
+    @apply bg-[#174A8B] hover:bg-[#2563B5] text-white font-semibold rounded-xl h-12 px-6 transition-all duration-200 shadow-sm active:translate-y-0 flex items-center justify-center gap-2;
   }
-  .glass-dark {
-    @apply bg-dark/70 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl;
+  .btn-secondary {
+    @apply bg-white border border-[#D0D5DD] text-[#174A8B] hover:bg-gray-50 font-semibold rounded-xl h-12 px-6 transition-all duration-200 flex items-center justify-center gap-2;
   }
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  .btn-dark {
+    @apply bg-[#0B1B33] hover:bg-[#174A8B] text-white font-semibold rounded-xl h-12 px-6 transition-all duration-200 flex items-center justify-center gap-2;
+  }
+  .card-base {
+    @apply bg-white border border-[#E4E7EC] rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#174A8B]/40 hover:-translate-y-0.5 transition-all duration-300;
   }
 }
 
@@ -38,3 +41,4 @@
 .reveal-text {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
 }
+

@@ -9,8 +9,8 @@ import { FiPhoneCall, FiMessageCircle } from 'react-icons/fi';
 const FloatingContactWidget = () => {
   const [hovered, setHovered] = useState(null);
 
-  const whatsappNumber = '918808880012';
-  const phoneNumber = '+918808880012';
+  const whatsappNumber = '919118913028';
+  const phoneNumber = '+919118913028';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello B&B Plastic Factory Desk, I'm interested in bulk wholesale inquiry."
   )}`;
@@ -25,7 +25,7 @@ const FloatingContactWidget = () => {
             hovered === 'phone' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'
           }`}
         >
-          Call Factory Sales: +91 88088 80012
+          Call Factory Sales: +91 91189 13028
         </div>
 
         <a
@@ -33,7 +33,7 @@ const FloatingContactWidget = () => {
           onMouseEnter={() => setHovered('phone')}
           onMouseLeave={() => setHovered(null)}
           aria-label="Call Factory Sales Direct"
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary hover:bg-blue-700 text-white flex items-center justify-center shadow-xl shadow-primary/35 hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/20"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#174A8B] hover:bg-[#2563B5] text-white flex items-center justify-center shadow-xl shadow-[#174A8B]/35 hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/20"
         >
           <FiPhoneCall className="w-5 h-5 sm:w-6 sm:h-6" />
         </a>

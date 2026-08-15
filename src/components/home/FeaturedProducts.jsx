@@ -1,27 +1,12 @@
+import { productsData, productCategories } from '../../data/productsData.js';
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiBarChart2, FiX } from 'react-icons/fi';
 import ProductCard from './ProductCard';
 import useScrollReveal from './hooks/useScrollReveal';
 
-// Same catalog as your carousel, extended with stock + discount fields.
-// These two new fields are optional on ProductCard, so nothing breaks
-// if a product omits them.
-const productsData = [
-  { id: 1, name: 'BPA-Free Sports Bottle & Container', category: 'Food Grade Polymer', grade: '100% Virgin Tritan / PP', price: '$18.50 / unit', moq: 'MOQ 100 pcs', rating: '4.9', badge: 'Best Seller', badgeColor: 'bg-blue-600', image: '/hero-products/Gemini_Generated_Image_c6lfquc6lfquc6lf.png', slug: 'bpa-free-sports-bottle', stock: 'in-stock', discountPercent: 22 },
-  { id: 2, name: 'Heavy-Duty Modular Industrial Stand', category: 'Industrial Molding', grade: 'Reinforced High-Impact ABS', price: '$45.00 / unit', moq: 'MOQ 50 pcs', rating: '5.0', badge: 'Industrial Grade', badgeColor: 'bg-emerald-600', image: '/hero-products/Gemini_Generated_Image_key2aykey2aykey2.png', slug: 'heavy-duty-modular-stand', stock: 'in-stock' },
-  { id: 3, name: 'Ergonomic Baby Booster Chair', category: 'Child Safety Polymer', grade: 'Non-Toxic Virgin PP/ABS', price: '$32.00 / unit', moq: 'MOQ 100 pcs', rating: '4.8', badge: 'Certified Safe', badgeColor: 'bg-amber-600', image: '/hero-products/Gemini_Generated_Image_iz86x8iz86x8iz86.png', slug: 'ergonomic-baby-booster-chair', stock: 'low-stock', discountPercent: 12 },
-  { id: 4, name: 'Industrial Storage & Logistics Crate', category: 'Heavy-Duty Containers', grade: 'High-Density Polyethylene', price: '$24.00 / unit', moq: 'MOQ 200 pcs', rating: '4.9', badge: 'High Durability', badgeColor: 'bg-purple-600', image: '/hero-products/Gemini_Generated_Image_axhokkaxhokkaxho.png', slug: 'industrial-storage-crate', stock: 'in-stock' },
-  { id: 5, name: 'Heavy-Duty Polymer Container 50L', category: 'Heavy-Duty Containers', grade: '100% Virgin HDPE Granules', price: '$28.50 / unit', moq: 'MOQ 150 pcs', rating: '4.9', badge: 'Reinforced Ribs', badgeColor: 'bg-indigo-600', image: '/hero-products/Gemini_Generated_Image_1040oi1040oi1040.png', slug: 'heavy-duty-polymer-container', stock: 'in-stock', discountPercent: 18 },
-  { id: 6, name: 'Commercial Utility Basin 35L', category: 'Heavy-Duty Containers', grade: 'Ultra-Grip Polymer Blend', price: '$21.00 / unit', moq: 'MOQ 100 pcs', rating: '4.7', badge: 'Chemical Resistant', badgeColor: 'bg-teal-600', image: '/hero-products/Gemini_Generated_Image_ctb1j3ctb1j3ctb1.png', slug: 'commercial-utility-basin', stock: 'in-stock' },
-  { id: 7, name: 'Precision Measuring Bucket 20L', category: 'Specialty Liquid Container', grade: 'Food & Industrial Grade HDPE', price: '$15.00 / unit', moq: 'MOQ 250 pcs', rating: '5.0', badge: 'Dual Scale', badgeColor: 'bg-blue-600', image: '/hero-products/Gemini_Generated_Image_vewpifvewpifvewp.png', slug: 'precision-measuring-bucket', stock: 'made-to-order' },
-  { id: 8, name: 'Ergonomic Utility Bucket with Spout', category: 'Heavy-Duty Containers', grade: 'Premium Injection Molded PP', price: '$14.50 / unit', moq: 'MOQ 300 pcs', rating: '4.8', badge: 'Ergonomic Grip', badgeColor: 'bg-rose-600', image: '/hero-products/Gemini_Generated_Image_p20xlxp20xlxp20x.png', slug: 'ergonomic-utility-bucket', stock: 'in-stock', discountPercent: 15 },
-];
-
-const categories = ['All', 'Heavy-Duty Containers', 'Industrial Molding', 'Food Grade Polymer', 'Child Safety Polymer', 'Specialty Liquid Container'];
-
 const FeaturedProductsGrid = () => {
-  const sectionRef = useScrollReveal({ itemSelector: '.product-item', y: 34, rotateX: -6 });
+  const sectionRef = useScrollReveal({ itemSelector: '.product-item', y: 30 });
   const [activeCategory, setActiveCategory] = useState('All');
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -45,7 +30,7 @@ const FeaturedProductsGrid = () => {
   const handleToggleCompare = (product) => {
     setCompareList((prev) => {
       if (prev.find((p) => p.id === product.id)) return prev.filter((p) => p.id !== product.id);
-      if (prev.length >= 4) return prev; // cap compare tray at 4
+      if (prev.length >= 4) return prev;
       return [...prev, product];
     });
   };
@@ -55,32 +40,33 @@ const FeaturedProductsGrid = () => {
   };
 
   return (
-    <section ref={sectionRef} className="py-24 bg-gradient-to-b from-gray-50 via-white to-gray-50 relative">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <section ref={sectionRef} className="py-16 sm:py-20 bg-[#F7F8FA] relative border-t border-[#E4E7EC]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1320px]">
         {/* Header */}
-        <div className="text-center mb-10">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#F0F4F8] text-[#174A8B] border border-[#E2E8F0] mb-3">
             Wholesale Catalog
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-secondary">
-            Featured B2B <span className="text-primary">Products</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 text-[#101828] tracking-tight">
+            Featured B2B <span className="text-[#174A8B]">Products</span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto text-base md:text-lg">
+          <p className="text-[#667085] text-sm sm:text-base leading-relaxed font-normal">
             Bulk-ready inventory with transparent MOQ, live stock status, and factory-direct pricing.
           </p>
         </div>
 
-        {/* Filters + cart summary */}
+        {/* Filters */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {categories.map((cat) => (
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mx-auto">
+            {productCategories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat
-                    ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-secondary'
-                  }`}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                  activeCategory === cat
+                    ? 'bg-[#174A8B] text-white shadow-sm'
+                    : 'bg-white text-[#667085] hover:bg-gray-100 hover:text-[#101828] border border-[#E4E7EC]'
+                }`}
               >
                 {cat}
               </button>
@@ -88,9 +74,9 @@ const FeaturedProductsGrid = () => {
           </div>
 
           {cart.length > 0 && (
-            <div className="flex items-center gap-3 text-sm font-semibold text-secondary bg-white border border-gray-200 rounded-full px-5 py-2.5 shadow-sm">
+            <div className="flex items-center gap-3 text-sm font-semibold text-[#101828] bg-white border border-[#E4E7EC] rounded-xl px-4 py-2 shadow-sm">
               <span>{cart.length} item{cart.length > 1 ? 's' : ''} in cart</span>
-              <Link to="/cart" className="text-primary hover:underline">View cart</Link>
+              <Link to="/cart" className="text-[#174A8B] hover:underline">View cart</Link>
             </div>
           )}
         </div>
@@ -112,25 +98,25 @@ const FeaturedProductsGrid = () => {
           ))}
         </div>
 
-        <div className="text-center mt-14">
+        <div className="text-center mt-12">
           <Link
             to="/products"
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-secondary text-white rounded-xl font-semibold hover:bg-primary transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2.5 px-7 py-3 bg-[#174A8B] hover:bg-[#2563B5] text-white rounded-xl font-semibold transition-all shadow-sm text-sm"
           >
             <span>Explore Complete Wholesale Catalog</span>
-            <FiArrowRight className="text-lg" />
+            <FiArrowRight className="text-base" />
           </Link>
         </div>
       </div>
 
       {/* Floating compare tray */}
       {compareList.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-secondary text-white rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-5 max-w-[92vw]">
-          <div className="flex items-center gap-2 font-semibold text-sm">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#0B1B33] text-white rounded-xl shadow-xl px-5 py-3.5 flex items-center gap-4 max-w-[92vw] border border-white/10">
+          <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm">
             <FiBarChart2 />
             <span>{compareList.length} product{compareList.length > 1 ? 's' : ''} selected</span>
           </div>
-          <button className="px-4 py-2 rounded-lg bg-primary hover:bg-blue-700 text-sm font-bold transition-colors">
+          <button className="px-4 py-2 rounded-lg bg-[#174A8B] hover:bg-[#2563B5] text-xs font-semibold transition-colors">
             Compare Now
           </button>
           <button

@@ -40,6 +40,7 @@ function App() {
                 <Route path="/help" element={<Help />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:slug" element={<ProductDetail />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
               </Routes>
             </main>
             <FloatingContactWidget />
