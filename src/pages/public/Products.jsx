@@ -1,16 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
 import {
   FiSearch, FiPackage, FiBarChart2, FiX,
   FiSliders
 } from 'react-icons/fi';
-import { productsData, productCategories } from '../../data/productsData.js';
+import { selectAllProducts } from '../../features/products/productsSlice.js';
+import { selectCategoryNames } from '../../features/categories/categoriesSlice.js';
 import ProductCard from '../../components/home/ProductCard.jsx';
 import useScrollReveal from '../../components/home/hooks/useScrollReveal.jsx';
 
 const Products = () => {
   const sectionRef = useScrollReveal({ itemSelector: '.product-item', y: 32, rotateX: -6 });
+  const products = useSelector(selectAllProducts);
+  const categories = useSelector(selectCategoryNames);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState([]);
@@ -18,15 +23,15 @@ const Products = () => {
   const [compareList, setCompareList] = useState([]);
 
   const filteredProducts = useMemo(() => {
-    return productsData.filter((product) => {
+    return products.filter((product) => {
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
       const matchesSearch =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.grade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchTerm.toLowerCase());
+        (product.grade && product.grade.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchTerm]);
+  }, [products, selectedCategory, searchTerm]);
 
   const handleAddToCart = (product) => {
     setCart((prev) => (prev.find((p) => p.id === product.id) ? prev : [...prev, product]));
@@ -90,7 +95,7 @@ const Products = () => {
         <div ref={sectionRef} className="container mx-auto px-4 max-w-[1320px]">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 bg-white p-6 rounded-2xl border border-[#E4E7EC] shadow-sm">
             <div className="flex flex-wrap items-center gap-2">
-              {productCategories.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}

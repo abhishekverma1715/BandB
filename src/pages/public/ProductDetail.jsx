@@ -1,17 +1,19 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
 import {
   FiCheckCircle, FiPackage, FiTruck, FiShield,
   FiArrowRight, FiMessageCircle, FiHeart, FiStar,
   FiAward
 } from 'react-icons/fi';
-import { productsData } from '../../data/productsData.js';
+import { selectAllProducts } from '../../features/products/productsSlice.js';
 import ProductCard from '../../components/home/ProductCard.jsx';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const products = useSelector(selectAllProducts);
   const [activeTab, setActiveTab] = useState('specs');
   const [quantity, setQuantity] = useState(100);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -21,14 +23,15 @@ const ProductDetail = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
 
-  // Find product by slug or id
+  // Find product by slug or id from Redux state
   const product = useMemo(() => {
-    if (!slug) return productsData[0];
-    const found = productsData.find(
+    if (!products || products.length === 0) return null;
+    if (!slug) return products[0];
+    const found = products.find(
       (p) => p.slug === slug || String(p.id) === slug
     );
-    return found || productsData[0];
-  }, [slug]);
+    return found || products[0];
+  }, [slug, products]);
 
   // Extract numeric price or fallback
   const basePriceNum = useMemo(() => {
@@ -69,11 +72,12 @@ const ProductDetail = () => {
 
   // Related products from same category or general catalog
   const relatedProducts = useMemo(() => {
-    return productsData
+    if (!product || !products) return [];
+    return products
       .filter((p) => p.id !== product.id && p.category === product.category)
-      .concat(productsData.filter((p) => p.id !== product.id))
+      .concat(products.filter((p) => p.id !== product.id))
       .slice(0, 4);
-  }, [product]);
+  }, [product, products]);
 
   const handleWhatsAppInquiry = () => {
     const message = `Hello B&B Plastics Team,\n\nI would like to request an official wholesale quotation for:\n- Product: ${product.name}\n- Category: ${product.category}\n- Grade: ${product.grade}\n- Quantity Required: ${quantity} units\n- Est. Unit Price: ₹${unitPrice}/unit\n\nPlease share availability and proforma invoice details.`;

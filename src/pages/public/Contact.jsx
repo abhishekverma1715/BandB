@@ -1,22 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiPhone, FiMail, FiClock, FiMessageCircle, FiShoppingCart, FiSettings, FiTruck } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addInquiry } from '../../features/inquiries/inquiriesSlice.js';
+import { useToast } from '../../components/common/Toast.jsx';
 
 const Contact = () => {
+  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { addToast } = useToast();
+
   const [formData, setFormData] = useState({
     name: '',
     company: '',
     email: '',
     phone: '',
-    subject: '',
-    product: '',
-    quantity: '',
-    message: '',
+    subject: searchParams.get('product') ? `Wholesale Quote: ${searchParams.get('product')}` : '',
+    product: searchParams.get('product') || '',
+    quantity: searchParams.get('qty') ? `${searchParams.get('qty')} units` : '',
+    message: searchParams.get('product') ? `Please provide factory-direct quote and delivery timelines for ${searchParams.get('product')}.` : '',
     newsletter: true,
     privacy: false
   });
+
+  useEffect(() => {
+    const prodParam = searchParams.get('product');
+    const qtyParam = searchParams.get('qty');
+    if (prodParam) {
+      setFormData((prev) => ({
+        ...prev,
+        product: prodParam,
+        subject: `Wholesale Quote: ${prodParam}`,
+        quantity: qtyParam ? `${qtyParam} units` : prev.quantity,
+        message: `Please provide factory-direct quote and delivery timelines for ${prodParam}.`,
+      }));
+    }
+  }, [searchParams]);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -44,15 +66,34 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API call
+
+    // Dispatch to Redux store
+    dispatch(
+      addInquiry({
+        name: formData.name,
+        company: formData.company,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject || 'Wholesale RFQ Inquiry',
+        product: formData.product,
+        quantity: formData.quantity,
+        message: formData.message,
+        newsletter: formData.newsletter,
+        privacy: formData.privacy,
+        status: 'new',
+        createdAt: new Date().toISOString(),
+      })
+    );
+
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
+      addToast('Your inquiry has been submitted directly to our operations desk!', 'success');
       setFormData({
         name: '', company: '', email: '', phone: '', subject: '', product: '', quantity: '', message: '', newsletter: true, privacy: false
       });
       setTimeout(() => setSuccess(false), 5000);
-    }, 1500);
+    }, 600);
   };
 
   return (

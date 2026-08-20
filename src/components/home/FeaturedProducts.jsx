@@ -1,20 +1,25 @@
-import { productsData, productCategories } from '../../data/productsData.js';
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { FiArrowRight, FiBarChart2, FiX } from 'react-icons/fi';
+import { selectAllProducts } from '../../features/products/productsSlice.js';
+import { selectCategoryNames } from '../../features/categories/categoriesSlice.js';
 import ProductCard from './ProductCard';
 import useScrollReveal from './hooks/useScrollReveal';
 
 const FeaturedProductsGrid = () => {
   const sectionRef = useScrollReveal({ itemSelector: '.product-item', y: 30 });
+  const products = useSelector(selectAllProducts);
+  const categories = useSelector(selectCategoryNames);
+
   const [activeCategory, setActiveCategory] = useState('All');
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [compareList, setCompareList] = useState([]);
 
   const filtered = useMemo(
-    () => (activeCategory === 'All' ? productsData : productsData.filter((p) => p.category === activeCategory)),
-    [activeCategory]
+    () => (activeCategory === 'All' ? products : products.filter((p) => p.category === activeCategory)),
+    [activeCategory, products]
   );
 
   const handleAddToCart = (product) => {
@@ -58,7 +63,7 @@ const FeaturedProductsGrid = () => {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
           <div className="flex flex-wrap items-center justify-center gap-2.5 mx-auto">
-            {productCategories.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}

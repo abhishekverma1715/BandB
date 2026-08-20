@@ -1,11 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const adminInfoFromStorage = localStorage.getItem('adminInfo')
-  ? JSON.parse(localStorage.getItem('adminInfo'))
-  : null;
+const adminInfoFromStorage = () => {
+  try {
+    const info = localStorage.getItem('adminInfo');
+    return info ? JSON.parse(info) : null;
+  } catch (e) {
+    return null;
+  }
+};
 
 const initialState = {
-  adminInfo: adminInfoFromStorage,
+  adminInfo: adminInfoFromStorage(),
 };
 
 const authSlice = createSlice({
@@ -24,4 +29,8 @@ const authSlice = createSlice({
 });
 
 export const { setCredentials, logout } = authSlice.actions;
+
+export const selectAdminInfo = (state) => state.auth.adminInfo;
+export const selectIsAuthenticated = (state) => Boolean(state.auth.adminInfo);
+
 export default authSlice.reducer;
