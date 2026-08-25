@@ -6,6 +6,7 @@ export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: getApiBaseUrl(),
+    credentials: 'include',
     prepareHeaders: (headers) => {
       const token = getAuthToken();
       if (token) {

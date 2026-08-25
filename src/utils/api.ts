@@ -6,6 +6,13 @@ export const getApiBaseUrl = (): string => {
     const trimmed = envUrl.trim().replace(/\/$/, '');
     return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
   }
+
+  // In production (Vercel), use the Render backend directly
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://bandb-backend-xcjn.onrender.com/api';
+  }
+
+  // Local dev: use Vite proxy
   return '/api';
 };
 
