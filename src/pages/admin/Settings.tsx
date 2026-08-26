@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { selectAdminInfo, setCredentials } from '../../features/auth/authSlice.js';
 import { selectAllProducts, resetProducts } from '../../features/products/productsSlice.js';
 import { selectAllInquiries, resetInquiries, clearAllInquiries } from '../../features/inquiries/inquiriesSlice.js';
 import { selectAllCategories, resetCategories } from '../../features/categories/categoriesSlice.js';
+import { api } from '../../utils/api.js';
 import {
   FiUser,
   FiBell,
@@ -21,6 +22,8 @@ import {
   FiSliders,
   FiKey,
   FiServer,
+  FiEye,
+  FiEyeOff,
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../../store/store.js';
@@ -50,12 +53,12 @@ const loadSavedFactorySettings = (): FactorySettingsState => {
   } catch {}
   return {
     factoryName: 'B&B Plastics & Industrial Molding Corp',
-    supportPhone: '+91 88088 80012',
-    whatsappNumber: '+91 88088 80012',
-    operatingHours: '08:00 AM - 08:00 PM (IST)',
-    currency: 'USD',
+    supportPhone: '+91 91189 13028',
+    whatsappNumber: '+91 91189 13028',
+    operatingHours: '09:00 AM - 06:00 PM (IST)',
+    currency: 'INR (₹)',
     taxGstNumber: '09AAACB1234F1Z5',
-    rfqForwardEmail: 'sales@bbplastics.com',
+    rfqForwardEmail: 'bbplasticsgida@gmail.com',
     lowStockThreshold: 10,
     notifyInquiries: true,
     notifyStock: true,
@@ -77,27 +80,71 @@ const Settings: React.FC = () => {
 
   const [name, setName] = useState(adminInfo?.name || 'Super Admin');
   const [email, setEmail] = useState(adminInfo?.email || 'manishverma123@gmail.com');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const [factorySettings, setFactorySettings] = useState<FactorySettingsState>(loadSavedFactorySettings());
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // Sync state with current admin credentials
+  useEffect(() => {
+    if (adminInfo) {
+      if (adminInfo.name) setName(adminInfo.name);
+      if (adminInfo.email) setEmail(adminInfo.email);
+    }
+  }, [adminInfo]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(
-      setCredentials({
+    if (!name.trim()) {
+      addToast('Admin display name cannot be empty.', 'error');
+      return;
+    }
+    if (!email.trim()) {
+      addToast('Primary login email cannot be empty.', 'error');
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const res = await api.auth.updateProfile({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+      });
+
+      const updatedToken = res.token || adminInfo?.token || 'bb-token';
+      const updatedAdmin = {
+        _id: res._id || adminInfo?._id || 'admin-01',
+        name: res.name || name.trim(),
+        email: res.email || email.trim().toLowerCase(),
+        role: res.role || adminInfo?.role || 'Super Admin',
+        token: updatedToken,
+      };
+
+      dispatch(setCredentials(updatedAdmin));
+      addToast('Admin profile & credentials updated successfully in database!', 'success');
+    } catch (err: any) {
+      // Fallback update to Redux state if offline or demo mode
+      const updatedAdmin = {
         ...adminInfo,
         _id: adminInfo?._id || 'admin-01',
         token: adminInfo?.token || 'bb-token',
         role: adminInfo?.role || 'Super Admin',
         name: name.trim(),
         email: email.trim().toLowerCase(),
-      })
-    );
-    addToast('Admin profile credentials updated successfully!', 'success');
+      };
+      dispatch(setCredentials(updatedAdmin));
+      addToast(err?.message || 'Profile updated locally.', 'info');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleSaveFactorySettings = (e: React.FormEvent) => {
@@ -106,22 +153,38 @@ const Settings: React.FC = () => {
     addToast('Factory trade desk & operational configurations saved!', 'success');
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentPassword) {
+      addToast('Please enter your current password.', 'error');
+      return;
+    }
     if (newPassword.length < 6) {
-      addToast('New password must be at least 6 characters.', 'error');
+      addToast('New password must be at least 6 characters long.', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
-      addToast('Passwords do not match. Please verify.', 'error');
+      addToast('New passwords do not match. Please verify.', 'error');
       return;
     }
 
-    addToast('Admin security password updated successfully!', 'success');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setIsPasswordModalOpen(false);
+    setIsChangingPassword(true);
+    try {
+      await api.auth.updatePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      addToast('Admin security password updated successfully in database!', 'success');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setIsPasswordModalOpen(false);
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to update password. Please check your current password.', 'error');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleExportBackup = () => {
@@ -320,10 +383,20 @@ const Settings: React.FC = () => {
               <div className="pt-3 flex justify-end">
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover transition-all shadow-md shadow-primary/20"
+                  disabled={isSavingProfile}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover transition-all shadow-md shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <FiSave />
-                  <span>Update Admin Credentials</span>
+                  {isSavingProfile ? (
+                    <>
+                      <FiRefreshCw className="animate-spin text-base" />
+                      <span>Saving Profile...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiSave />
+                      <span>Update Admin Credentials</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -716,42 +789,72 @@ const Settings: React.FC = () => {
                   <label className="block text-gray-700 font-bold uppercase tracking-wider mb-1">
                     Current Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary text-secondary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showCurrentPassword ? <FiEyeOff className="text-base" /> : <FiEye className="text-base" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-gray-700 font-bold uppercase tracking-wider mb-1">
                     New Security Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary text-secondary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showNewPassword ? <FiEyeOff className="text-base" /> : <FiEye className="text-base" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-gray-700 font-bold uppercase tracking-wider mb-1">
                     Confirm New Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-[#F7F8FA] border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary text-secondary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showConfirmPassword ? <FiEyeOff className="text-base" /> : <FiEye className="text-base" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
@@ -764,9 +867,17 @@ const Settings: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover transition-colors shadow-md shadow-primary/20"
+                    disabled={isChangingPassword}
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover transition-colors shadow-md shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Save New Password
+                    {isChangingPassword ? (
+                      <>
+                        <FiRefreshCw className="animate-spin text-sm" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Save New Password</span>
+                    )}
                   </button>
                 </div>
               </form>

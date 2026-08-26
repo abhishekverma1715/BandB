@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiArrowRight,
@@ -9,51 +9,56 @@ import {
   FiHeadphones,
   FiSettings,
 } from 'react-icons/fi';
+import { useAppDispatch, useAppSelector } from '../../store/store.js';
+import { selectAllCategories, fetchCategories } from '../../features/categories/categoriesSlice.js';
+import { selectAllProducts, fetchProducts } from '../../features/products/productsSlice.js';
 
-const categories = [
-  {
-    number: '01',
-    title: 'Containers & Tubs',
-    count: '42 Products',
-    image: '/category-assets/cat-containers-tubs.jpg',
-    href: '/products?category=Heavy-Duty%20Containers',
-  },
-  {
-    number: '02',
-    title: 'Food-Grade Bottles',
-    count: '28 Products',
-    image: '/category-assets/cat-food-bottles.jpg',
-    href: '/products?category=Food%20Grade%20Polymer',
-  },
-  {
-    number: '03',
-    title: 'Ergonomic Seating',
-    count: '19 Products',
-    image: '/category-assets/cat-plastic-chairs.jpg',
-    href: '/products?category=Child%20Safety%20Polymer',
-  },
-  {
-    number: '04',
-    title: 'Stands & Racks',
-    count: '35 Products',
-    image: '/category-assets/cat-stands-racks.jpg',
-    href: '/products?category=Industrial%20Molding',
-  },
-  {
-    number: '05',
-    title: 'Buckets & Basins',
-    count: '31 Products',
-    image: '/category-assets/cat-buckets-basins.jpg',
-    href: '/products?category=Heavy-Duty%20Containers',
-  },
+const categoryImages: Record<string, string> = {
+  'heavy-duty-containers': '/category-assets/cat-containers-tubs.jpg',
+  'food-grade-polymer': '/category-assets/cat-food-bottles.jpg',
+  'child-safety-polymer': '/category-assets/cat-plastic-chairs.jpg',
+  'industrial-molding': '/category-assets/cat-stands-racks.jpg',
+  'household-and-sanitary': '/category-assets/cat-buckets-basins.jpg',
+  'kitchen-and-storage-racks': '/category-assets/cat-stands-racks.jpg',
+};
+
+const defaultImages = [
+  '/category-assets/cat-containers-tubs.jpg',
+  '/category-assets/cat-food-bottles.jpg',
+  '/category-assets/cat-plastic-chairs.jpg',
+  '/category-assets/cat-stands-racks.jpg',
+  '/category-assets/cat-buckets-basins.jpg',
 ];
 
 const WholesaleCategories: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const rawCategories = useAppSelector(selectAllCategories);
+  const products = useAppSelector(selectAllProducts);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
+  const categories = useMemo(() => {
+    return rawCategories.map((cat, idx) => {
+      const count = products.filter((p) => p.category === cat.name).length;
+      const img = categoryImages[cat.slug] || defaultImages[idx % defaultImages.length];
+      return {
+        id: cat.id || cat._id,
+        number: `0${idx + 1}`.slice(-2),
+        title: cat.name,
+        count: `${count} ${count === 1 ? 'Product' : 'Products'}`,
+        image: img,
+        href: `/products?category=${encodeURIComponent(cat.name)}`,
+      };
+    });
+  }, [rawCategories, products]);
   return (
     <section className="py-16 md:py-20 bg-white text-[#101828] font-sans">
       <div className="container mx-auto px-4 max-w-[1320px]">
-        {/* Main Grid: Row 1 (Header Card + Card 01 + Card 02) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        {/* Main Grid: Header Card + Dynamic Category Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Top Left Header Card */}
           <div className="bg-[#F7F8FA] rounded-2xl p-8 md:p-10 border border-[#E4E7EC] shadow-sm flex flex-col justify-between">
             <div>
@@ -79,168 +84,40 @@ const WholesaleCategories: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 01: Containers & Tubs */}
-          <Link
-            to={categories[0].href}
-            className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="h-56 bg-slate-100 overflow-hidden relative">
-              <img
-                src={categories[0].image}
-                alt={categories[0].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#174A8B]">
-                    {categories[0].number}
-                  </span>
-                  <h3 className="text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors">
-                    {categories[0].title}
-                  </h3>
+          {/* Dynamic Category Cards */}
+          {categories.map((cat) => (
+            <Link
+              key={cat.id || cat.title}
+              to={cat.href}
+              className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between min-h-[280px]"
+            >
+              <div className="h-48 bg-slate-100 overflow-hidden relative">
+                <img
+                  src={cat.image}
+                  alt={cat.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-5 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="font-mono text-sm font-bold text-[#174A8B]">
+                      {cat.number}
+                    </span>
+                    <h3 className="text-base sm:text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors line-clamp-1">
+                      {cat.title}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[#667085] font-medium pl-7">
+                    {cat.count}
+                  </p>
                 </div>
-                <p className="text-xs text-[#667085] font-medium pl-7">
-                  {categories[0].count}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm">
-                <FiArrowUpRight className="text-lg" />
-              </div>
-            </div>
-          </Link>
-
-          {/* Card 02: Food-Grade Bottles */}
-          <Link
-            to={categories[1].href}
-            className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="h-56 bg-slate-100 overflow-hidden relative">
-              <img
-                src={categories[1].image}
-                alt={categories[1].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#174A8B]">
-                    {categories[1].number}
-                  </span>
-                  <h3 className="text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors">
-                    {categories[1].title}
-                  </h3>
+                <div className="w-9 h-9 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm flex-shrink-0">
+                  <FiArrowUpRight className="text-base" />
                 </div>
-                <p className="text-xs text-[#667085] font-medium pl-7">
-                  {categories[1].count}
-                </p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm">
-                <FiArrowUpRight className="text-lg" />
-              </div>
-            </div>
-          </Link>
-        </div>
-
-        {/* Row 2: 3 Category Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Card 03: Ergonomic Seating */}
-          <Link
-            to={categories[2].href}
-            className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="h-48 bg-slate-100 overflow-hidden relative">
-              <img
-                src={categories[2].image}
-                alt={categories[2].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#174A8B]">
-                    {categories[2].number}
-                  </span>
-                  <h3 className="text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors">
-                    {categories[2].title}
-                  </h3>
-                </div>
-                <p className="text-xs text-[#667085] font-medium pl-7">
-                  {categories[2].count}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm">
-                <FiArrowUpRight className="text-lg" />
-              </div>
-            </div>
-          </Link>
-
-          {/* Card 04: Stands & Racks */}
-          <Link
-            to={categories[3].href}
-            className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="h-48 bg-slate-100 overflow-hidden relative">
-              <img
-                src={categories[3].image}
-                alt={categories[3].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#174A8B]">
-                    {categories[3].number}
-                  </span>
-                  <h3 className="text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors">
-                    {categories[3].title}
-                  </h3>
-                </div>
-                <p className="text-xs text-[#667085] font-medium pl-7">
-                  {categories[3].count}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm">
-                <FiArrowUpRight className="text-lg" />
-              </div>
-            </div>
-          </Link>
-
-          {/* Card 05: Buckets & Basins */}
-          <Link
-            to={categories[4].href}
-            className="group bg-white rounded-2xl border border-[#E4E7EC] shadow-sm hover:shadow-md hover:border-[#174A8B]/50 transition-all duration-300 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="h-48 bg-slate-100 overflow-hidden relative">
-              <img
-                src={categories[4].image}
-                alt={categories[4].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-sm font-bold text-[#174A8B]">
-                    {categories[4].number}
-                  </span>
-                  <h3 className="text-lg font-bold text-[#101828] group-hover:text-[#174A8B] transition-colors">
-                    {categories[4].title}
-                  </h3>
-                </div>
-                <p className="text-xs text-[#667085] font-medium pl-7">
-                  {categories[4].count}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[#174A8B] text-white flex items-center justify-center group-hover:bg-[#2563B5] transition-colors shadow-sm">
-                <FiArrowUpRight className="text-lg" />
-              </div>
-            </div>
-          </Link>
+            </Link>
+          ))}
         </div>
 
         {/* Row 3: Custom OEM Tooling */}

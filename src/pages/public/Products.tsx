@@ -94,32 +94,73 @@ const Products: React.FC = () => {
         </div>
 
         <div ref={sectionRef} className="container mx-auto px-4 max-w-[1320px]">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 bg-white p-6 rounded-2xl border border-[#E4E7EC] shadow-sm">
-            <div className="flex flex-wrap items-center gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4.5 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
-                    selectedCategory === cat
-                      ? 'bg-[#174A8B] text-white shadow-sm'
-                      : 'bg-[#F0F4F8] text-[#101828] hover:bg-gray-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+          {/* Filter & Search Bar */}
+          <div className="mb-10 bg-white rounded-2xl border border-[#E4E7EC] shadow-sm overflow-hidden">
+            {/* Top row: Label + Search + Result count */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-5 pt-5 pb-4 border-b border-[#E4E7EC]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#174A8B] flex items-center justify-center flex-shrink-0">
+                  <FiSliders className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#101828] leading-tight">Filter Products</h3>
+                  <p className="text-xs text-[#667085] mt-0.5">
+                    Showing{' '}
+                    <span className="font-bold text-[#174A8B]">{filteredProducts.length}</span> of{' '}
+                    <span className="font-semibold">{products.length}</span> products
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative w-full sm:w-72 md:w-80">
+                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search product name or grade..."
+                  className="w-full pl-10 pr-10 py-2.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-sm text-[#101828] placeholder-[#98A2B3] focus:outline-none focus:border-[#174A8B] focus:ring-2 focus:ring-[#174A8B]/20 transition-all"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <FiX className="w-3 h-3 text-[#667085]" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="relative w-full md:w-80">
-              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
-              <input
-                type="text"
-                placeholder="Search product name or grade..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-sm text-[#101828] focus:outline-none focus:border-[#174A8B] focus:ring-2 focus:ring-[#174A8B]/20 transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            {/* Category pills — horizontal scroll on mobile, wrap on desktop */}
+            <div className="px-5 py-4">
+              <div className="flex gap-2 overflow-x-auto pb-1 -mb-1 scrollbar-hide md:flex-wrap md:overflow-visible">
+                {categories.map((cat) => {
+                  const isActive = selectedCategory === cat;
+                  const count = cat === 'All' ? products.length : products.filter((p) => p.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border-2 ${
+                        isActive
+                          ? 'bg-[#174A8B] text-white border-[#174A8B] shadow-md shadow-[#174A8B]/20'
+                          : 'bg-[#F7F8FA] text-[#344054] border-transparent hover:bg-[#EEF2F6] hover:border-[#D0D5DD]'
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold leading-none ${
+                          isActive ? 'bg-white/25 text-white' : 'bg-[#E4E7EC] text-[#667085]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

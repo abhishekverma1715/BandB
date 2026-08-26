@@ -118,6 +118,10 @@ export const api = {
       apiPost<Admin>('/auth/login', credentials),
     me: () => apiGet<ApiResponse<Admin>>('/auth/me'),
     logout: () => apiPost<{ success: boolean; message: string }>('/auth/logout'),
+    updateProfile: (data: { name: string; email: string }) =>
+      apiPut<{ success: boolean; message: string; _id: string; name: string; email: string; role: string; token: string }>('/auth/profile', data),
+    updatePassword: (data: { currentPassword: string; newPassword: string }) =>
+      apiPut<{ success: boolean; message: string }>('/auth/password', data),
   },
   products: {
     getAll: (params?: { category?: string; stock?: string; search?: string }) =>

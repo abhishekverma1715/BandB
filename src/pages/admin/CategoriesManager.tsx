@@ -135,6 +135,8 @@ const CategoriesManager: React.FC = () => {
 
     try {
       await dispatch(addCategory(payload as any)).unwrap();
+      await dispatch(fetchCategories()).unwrap();
+      await dispatch(fetchProducts()).unwrap();
       addToast(`Category "${name}" created live in database!`, 'success');
       setIsAddModalOpen(false);
     } catch {
@@ -161,6 +163,8 @@ const CategoriesManager: React.FC = () => {
 
     try {
       await dispatch(updateCategory(payload as any)).unwrap();
+      await dispatch(fetchCategories()).unwrap();
+      await dispatch(fetchProducts()).unwrap();
       addToast(`Category "${name}" updated successfully!`, 'success');
       setEditingCategory(null);
     } catch {
@@ -174,6 +178,8 @@ const CategoriesManager: React.FC = () => {
     const targetId = deleteConfirmCategory._id || deleteConfirmCategory.id;
     try {
       await dispatch(deleteCategory(targetId)).unwrap();
+      await dispatch(fetchCategories()).unwrap();
+      await dispatch(fetchProducts()).unwrap();
       addToast(`Category "${deleteConfirmCategory.name}" removed from database.`, 'info');
     } catch {
       addToast('Category removed from catalog.', 'info');

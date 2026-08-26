@@ -21,12 +21,8 @@ const Navbar: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Determine navbar background & shadow based on route and scroll state
-  const navBackgroundClass = isHomePage
-    ? scrolled || mobileMenuOpen
-      ? 'bg-[#FAF8F5]/95 backdrop-blur-md shadow-sm py-3 border-b border-[#E5E0DA]'
-      : 'bg-transparent py-4 sm:py-5'
-    : 'bg-white shadow-sm py-3.5 border-b border-[#E4E7EC]';
+  // Navbar always uses solid white for consistent visibility
+  const navBackgroundClass = 'bg-white py-3 border-b border-[#E4E7EC]' + (scrolled ? ' shadow-sm' : '');
 
   return (
     <nav className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ${navBackgroundClass}`}>
@@ -40,51 +36,46 @@ const Navbar: React.FC = () => {
         <div className="hidden lg:flex items-center space-x-8 text-sm font-bold text-[#1E293B]">
           <Link
             to="/"
-            className={`transition-colors relative py-1 ${
-              location.pathname === '/'
+            className={`transition-colors relative py-1 ${location.pathname === '/'
                 ? 'text-[#023061] after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#B2151E] after:rounded-full'
                 : 'hover:text-[#023061]'
-            }`}
+              }`}
           >
             Home
           </Link>
           <Link
             to="/products"
-            className={`transition-colors relative py-1 ${
-              location.pathname.startsWith('/products')
+            className={`transition-colors relative py-1 ${location.pathname.startsWith('/products')
                 ? 'text-[#023061] after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#B2151E] after:rounded-full'
                 : 'hover:text-[#023061]'
-            }`}
+              }`}
           >
             Products
           </Link>
           <Link
             to="/about"
-            className={`transition-colors relative py-1 ${
-              location.pathname === '/about'
+            className={`transition-colors relative py-1 ${location.pathname === '/about'
                 ? 'text-[#023061] after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#B2151E] after:rounded-full'
                 : 'hover:text-[#023061]'
-            }`}
+              }`}
           >
             About Us
           </Link>
           <Link
             to="/help"
-            className={`transition-colors relative py-1 ${
-              location.pathname === '/help'
+            className={`transition-colors relative py-1 ${location.pathname === '/help'
                 ? 'text-[#023061] after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#B2151E] after:rounded-full'
                 : 'hover:text-[#023061]'
-            }`}
+              }`}
           >
-            HelpCenter
+            Help Center
           </Link>
           <Link
             to="/contact"
-            className={`transition-colors relative py-1 ${
-              location.pathname === '/contact'
+            className={`transition-colors relative py-1 ${location.pathname === '/contact'
                 ? 'text-[#023061] after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#B2151E] after:rounded-full'
                 : 'hover:text-[#023061]'
-            }`}
+              }`}
           >
             Contact
           </Link>
@@ -132,45 +123,40 @@ const Navbar: React.FC = () => {
           <div className="flex flex-col space-y-2 font-bold text-[#1E293B]">
             <Link
               to="/"
-              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${
-                location.pathname === '/' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${location.pathname === '/' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
+                }`}
             >
               <span>Home</span>
               <FiArrowRight className="w-4 h-4 text-gray-400" />
             </Link>
             <Link
               to="/products"
-              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${
-                location.pathname.startsWith('/products') ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${location.pathname.startsWith('/products') ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
+                }`}
             >
               <span>Wholesale Products</span>
               <FiArrowRight className="w-4 h-4 text-gray-400" />
             </Link>
             <Link
               to="/about"
-              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${
-                location.pathname === '/about' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${location.pathname === '/about' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
+                }`}
             >
               <span>About Factory &amp; Facility</span>
               <FiArrowRight className="w-4 h-4 text-gray-400" />
             </Link>
             <Link
               to="/help"
-              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${
-                location.pathname === '/help' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${location.pathname === '/help' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
+                }`}
             >
               <span>HelpCenter</span>
               <FiArrowRight className="w-4 h-4 text-gray-400" />
             </Link>
             <Link
               to="/contact"
-              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${
-                location.pathname === '/contact' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm ${location.pathname === '/contact' ? 'bg-[#F0F4F8] text-[#023061]' : 'hover:bg-gray-50'
+                }`}
             >
               <span>Contact Trade Desk</span>
               <FiArrowRight className="w-4 h-4 text-gray-400" />

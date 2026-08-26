@@ -122,23 +122,6 @@ const ProductDetail: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0B1B33]/80 via-[#0B1B33]/50 to-[#0B1B33]/20" />
 
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1320px] relative z-10">
-            <div className="text-xs sm:text-sm text-gray-300 mb-3 flex items-center flex-wrap gap-2 font-medium">
-              <Link to="/" className="hover:text-blue-300 transition-colors">
-                Home
-              </Link>
-              <span>/</span>
-              <Link to="/products" className="hover:text-blue-300 transition-colors">
-                Wholesale Catalog
-              </Link>
-              <span>/</span>
-              <span className="text-[#174A8B] bg-white/10 px-2.5 py-0.5 rounded text-white font-semibold">
-                {product.category}
-              </span>
-              <span>/</span>
-              <span className="text-white font-bold truncate max-w-[200px] sm:max-w-none">
-                {product.name}
-              </span>
-            </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
               {product.name}

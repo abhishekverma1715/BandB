@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import {
@@ -12,14 +12,21 @@ import {
   FiTruck,
 } from 'react-icons/fi';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useAppDispatch } from '../../store/store.js';
+import { useAppDispatch, useAppSelector } from '../../store/store.js';
 import { submitInquiry } from '../../features/inquiries/inquiriesSlice.js';
+import { selectCategoryNames, fetchCategories } from '../../features/categories/categoriesSlice.js';
 import { useToast } from '../../components/common/Toast.js';
+import { productsData } from '../../data/productsData.js';
 
 const Contact: React.FC = () => {
   const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
+  const reduxCategoryNames = useAppSelector(selectCategoryNames);
   const { addToast } = useToast();
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -52,6 +59,22 @@ const Contact: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  /** Live product categories (excluding 'All') from Redux store */
+  const categories = useMemo(
+    () => reduxCategoryNames.filter((c) => c !== 'All'),
+    [reduxCategoryNames]
+  );
+
+  /** Products filtered by selected category */
+  const filteredProducts = useMemo(
+    () =>
+      selectedCategory
+        ? productsData.filter((p) => p.category === selectedCategory)
+        : productsData,
+    [selectedCategory]
+  );
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -142,10 +165,10 @@ const Contact: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us | B&B Plastic</title>
+        <title>Contact Us | B&B Plastic — Get a Quote</title>
         <meta
           name="description"
-          content="Get in touch with our team for wholesale polymer inquiries, custom mold quotes or direct factory support."
+          content="Contact B&B Plastic for wholesale quotes, product inquiries, sample requests, or bulk orders. Reach our team via phone, email, or WhatsApp."
         />
       </Helmet>
 
@@ -154,7 +177,7 @@ const Contact: React.FC = () => {
         <div className="relative pt-32 sm:pt-36 pb-20 sm:pb-24 mb-12 border-b border-[#0B1B33] overflow-hidden bg-[#0B1B33] w-full">
           <img
             src="/contact-hero.jpg"
-            alt="B&B Plastics Interactive Trade Assistance Desk"
+            alt="B&B Plastic — Contact Our Sales Team"
             className="absolute inset-0 w-full h-full object-cover object-center min-w-full min-h-full opacity-85 filter brightness-[1.05] contrast-[1.05]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0B1B33]/80 via-[#0B1B33]/50 to-[#0B1B33]/20" />
@@ -162,13 +185,13 @@ const Contact: React.FC = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1320px] relative z-10">
             <div className="max-w-3xl">
               <span className="inline-block px-3.5 py-1 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider bg-[#174A8B]/30 text-blue-300 mb-4 border border-[#174A8B]/50 shadow-sm">
-                Direct Trade Desk &amp; Factory Support
+                Sales &amp; Support
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-5 leading-tight">
-                Contact <span className="text-white">Our Engineers</span>
+                Contact <span className="text-white">Our Team</span>
               </h1>
               <p className="text-slate-200 text-base sm:text-lg lg:text-xl leading-relaxed font-normal">
-                Connect directly with our GIDA Gorakhpur manufacturing team for FOB/CIF quotes, sample requests, or OEM custom mold engineering.
+                Get in touch for wholesale pricing, product inquiries, sample requests, or bulk order quotations. We're here to help.
               </p>
             </div>
           </div>
@@ -180,7 +203,7 @@ const Contact: React.FC = () => {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold mb-3 text-[#101828]">Get in Touch</h2>
               <p className="text-[#667085] max-w-2xl mx-auto">
-                We're here to help with your wholesale polymer and plastic product requirements
+                We're here to help with your product inquiries, wholesale orders, and business requirements
               </p>
             </div>
 
@@ -228,13 +251,13 @@ const Contact: React.FC = () => {
                 <h4 className="text-xl font-bold mb-4 text-[#101828]">Call Us</h4>
                 <div className="text-[#667085] text-sm space-y-4 font-normal">
                   <p>
-                    <strong className="text-[#101828]">Sales &amp; Technical Desk:</strong>
+                    <strong className="text-[#101828]">Sales &amp; Orders:</strong>
                     <br />
                     +91 91189 13028
                   </p>
                   <div className="w-12 h-px bg-[#E4E7EC] mx-auto"></div>
                   <p>
-                    <strong className="text-[#101828]">Factory Trade Helpline (24/7):</strong>
+                    <strong className="text-[#101828]">WhatsApp Support:</strong>
                     <br />
                     +91 91189 13028
                   </p>
@@ -251,13 +274,13 @@ const Contact: React.FC = () => {
                 <h4 className="text-xl font-bold mb-4 text-[#101828]">Email Us</h4>
                 <div className="text-[#667085] text-sm space-y-4 font-normal">
                   <p>
-                    <strong className="text-[#101828]">General &amp; Bulk Sales:</strong>
+                    <strong className="text-[#101828]">General &amp; Sales:</strong>
                     <br />
                     bbplasticsgida@gmail.com
                   </p>
                   <div className="w-12 h-px bg-[#E4E7EC] mx-auto"></div>
                   <p>
-                    <strong className="text-[#101828]">Export &amp; OEM Inquiries:</strong>
+                    <strong className="text-[#101828]">Bulk &amp; Wholesale Orders:</strong>
                     <br />
                     bbplasticsgida@gmail.com
                   </p>
@@ -358,17 +381,55 @@ const Contact: React.FC = () => {
                         className="w-full px-4 py-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl focus:ring-2 focus:ring-[#174A8B] focus:border-transparent outline-none transition-all text-sm"
                       >
                         <option value="">Select a subject</option>
-                        <option value="Request for Quote">Request for Quote</option>
+                        <option value="Wholesale Quote Request">Wholesale Quote Request</option>
                         <option value="Product Information">Product Information</option>
-                        <option value="Technical Support">Technical Support</option>
-                        <option value="Request for Sample">Request for Sample</option>
-                        <option value="Business Partnership">Business Partnership</option>
+                        <option value="Sample Request">Sample Request</option>
+                        <option value="Bulk / Distributor Inquiry">Bulk / Distributor Inquiry</option>
+                        <option value="Custom Branding / Private Label">Custom Branding / Private Label</option>
+                        <option value="Shipping & Delivery Query">Shipping &amp; Delivery Query</option>
+                        <option value="Complaint / Return">Complaint / Return</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-[#101828] mb-2">
-                        Product Interest
+                        Quantity (approx.)
+                      </label>
+                      <input
+                        type="text"
+                        name="quantity"
+                        value={formData.quantity}
+                        onChange={handleChange}
+                        placeholder="e.g. 500 pcs, 100 sets"
+                        className="w-full px-4 py-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl focus:ring-2 focus:ring-[#174A8B] focus:border-transparent outline-none transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#101828] mb-2">
+                        Product Category
+                      </label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          setFormData((prev) => ({ ...prev, product: '' }));
+                        }}
+                        className="w-full px-4 py-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl focus:ring-2 focus:ring-[#174A8B] focus:border-transparent outline-none transition-all text-sm"
+                      >
+                        <option value="">All Categories</option>
+                        {categories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#101828] mb-2">
+                        Specific Product
                       </label>
                       <select
                         name="product"
@@ -376,11 +437,12 @@ const Contact: React.FC = () => {
                         onChange={handleChange}
                         className="w-full px-4 py-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl focus:ring-2 focus:ring-[#174A8B] focus:border-transparent outline-none transition-all text-sm"
                       >
-                        <option value="">Select a product</option>
-                        <option value="Heavy-Duty Containers">Industrial Containers</option>
-                        <option value="Heavy-Duty Crates">Heavy Duty Crates</option>
-                        <option value="Food Grade Bottles">BPA Free Bottles</option>
-                        <option value="Ergonomic Seating">Commercial Seating</option>
+                        <option value="">Select a product (optional)</option>
+                        {filteredProducts.map((prod) => (
+                          <option key={prod.id} value={prod.name}>
+                            {prod.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -525,10 +587,10 @@ const Contact: React.FC = () => {
                   <div className="w-12 h-12 bg-[#F0F4F8] text-[#174A8B] rounded-xl flex items-center justify-center">
                     <FiShoppingCart className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xl font-bold text-[#101828]">Sales Department</h4>
+                  <h4 className="text-xl font-bold text-[#101828]">Sales &amp; Orders</h4>
                 </div>
                 <p className="text-[#667085] mb-6 text-xs sm:text-sm">
-                  For product inquiries, pricing, quotes, and order placement.
+                  For product inquiries, wholesale pricing, bulk order quotations, and distributor partnerships.
                 </p>
                 <div className="text-xs sm:text-sm font-medium text-[#101828] space-y-2 mb-6">
                   <p>
@@ -553,10 +615,10 @@ const Contact: React.FC = () => {
                   <div className="w-12 h-12 bg-emerald-50 text-[#16A36A] rounded-xl flex items-center justify-center">
                     <FiSettings className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xl font-bold text-[#101828]">Technical Support</h4>
+                  <h4 className="text-xl font-bold text-[#101828]">Product &amp; Quality Support</h4>
                 </div>
                 <p className="text-[#667085] mb-6 text-xs sm:text-sm">
-                  For technical questions, material selection, and processing guidance.
+                  For product specifications, quality queries, sample requests, and custom branding discussions.
                 </p>
                 <div className="text-xs sm:text-sm font-medium text-[#101828] space-y-2 mb-6">
                   <p>
@@ -584,7 +646,7 @@ const Contact: React.FC = () => {
                   <h4 className="text-xl font-bold text-[#101828]">Logistics &amp; Shipping</h4>
                 </div>
                 <p className="text-[#667085] mb-6 text-xs sm:text-sm">
-                  For delivery tracking, shipping queries, and logistics coordination.
+                  For delivery tracking, shipping queries, order status, and logistics coordination.
                 </p>
                 <div className="text-xs sm:text-sm font-medium text-[#101828] space-y-2 mb-6">
                   <p>
